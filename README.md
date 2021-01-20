@@ -4,11 +4,6 @@ This is a program to simulate the optimization of evaluation function on Reversi
 # Requirement
 * numpy
 
-# Installation
-```bash
-pip install numpy
-```
-
 # Usage
 
 ### Simulates GA on reversi
