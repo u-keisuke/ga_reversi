@@ -7,30 +7,34 @@
 import time
 import numpy as np
 
-
+# The size of board
 SIZE = 8
+# The start condition
 START_BOARD = np.zeros((SIZE, SIZE), dtype=int)
 START_BOARD[SIZE//2, SIZE//2], START_BOARD[SIZE//2-1, SIZE//2-1] = 1, 1
 START_BOARD[SIZE//2-1, SIZE//2], START_BOARD[SIZE//2, SIZE//2-1] = -1, -1
+# The maximum serch depth of Min-Max method
 DEPTH = 3
 
 
 class Game:
-    # -1が先攻、1が後攻
+    # First player: -1, Second player: 1
     def __init__(self, b, first_eb, second_eb):
         self.board = b
         self.eboards = (first_eb, np.nan, second_eb)
     
     
+    # Copy this class itself
     def copy(self):
         return Game(self.board.copy(), self.eboards[0], self.eboards[2])
     
     
+    # Count the number of player's stones.
     def count_stones(self, player):
         return np.sum(self.board == player)
     
     
-    # 石が置けるところを探す
+    # Find the positions where the player can put a stone.
     #   arg:    player
     #   return: pos
     def find_available(self, player):
@@ -43,6 +47,7 @@ class Game:
         return availables
     
     
+    # Judge if the game has ended.
     def judge_gameend(self):
         if np.sum(START_BOARD==0) == 0:
             return True
@@ -52,6 +57,7 @@ class Game:
             return False
     
     
+    # Judge the winner of this game
     # if draw, return 0
     def judge_winner(self):
         # 先手、後手の石の数
@@ -60,19 +66,21 @@ class Game:
         elif num_1 < num_2 : return 1
         else: return 0
         
-    
-    # playerがposに石を置く
+        
+    # Put a stone on a specific position.
+    #   arg:    player, position
+    #   return: board
     def forward(self, player, pos):
         b = self.board.copy()
         b[pos] = player
-        # 8方向に探索
+        # Search in eight directions
         for i in (-1,0,1):
             for j in (-1,0,1):
                 if (i==0 and j==0): continue
-                # focusしている部分が条件を満たすまで探索
+                # Search until the condition is satisfied
                 for k in range(1,SIZE):
                     x, y = pos[0]+i*k, pos[1]+j*k
-                    # 盤面の範囲内かどうか
+                    # Judge if the position is inside the board
                     if (x not in np.arange(0,SIZE)) or (y not in np.arange(0,SIZE)): break
                     if (self.board[x,y]==0): break
                     if (self.board[x,y]==player):
@@ -81,25 +89,26 @@ class Game:
         return b
     
     
-    # playerにとっての盤面評価関数
+    # The board-evaluation function for the player
+    #   arg:    player
+    #   return: evaluation score for the player
     def eval_board(self, player):
         eb = self.eboards[player+1]
         return np.sum(eb * self.board) * player
     
     
-    # alpha-beta methods
-    #   arg:    game, evaluator(先手), player, 探索の深さ, 枝刈り用の閾値
-    #   return: 盤面の評価値, 置いた石のpos
-    def alphabeta(self, evaluator, player, depth, limit):
+    # Min-Max methods
+    #   arg:    game, evaluator(first player), player, max-search-depth, threshold to cutoff
+    #   return: evaluation score, success of positions to take
+    def minmax(self, evaluator, player, depth, limit):
         if depth == 0:
             return self.eval_board(evaluator), []
 
-        # playerが先手なら1, 後手なら-1
         switch = 1 if evaluator==player else -1
         value = -switch * np.inf
         choices = self.find_available(player)
 
-        # choicesが空のリストの場合
+        # When choices have no content
         if not choices:
             return self.eval_board(evaluator), []
 
@@ -107,22 +116,21 @@ class Game:
         for pos in choices:
             g = self.copy()
             g.board = g.forward(player, pos)
-            v, m = g.alphabeta(evaluator, -player, depth-1, value)
+            v, m = g.minmax(evaluator, -player, depth-1, value)
             # min-max method (if switch=-1 -> value=min, switch=1 -> value=max)
             if value * switch < v * switch:
                 value = v
                 move = m + [pos]
-            # alpha-beta method
+            # alpha-beta method (The debug cannot be completed)
             #if value * switch >= limit * switch: break
         return value, move
 
-    
     
     # find best move
     #   arg:    game, player(1 or -1), depth
     #   return: score, best move
     def find_best_move(self, player, depth):
-        result = self.alphabeta(player, player, depth, np.inf)
+        result = self.minmax(player, player, depth, np.inf)
         try:
             score, best_move = result[0], result[1][-1]
         except:
@@ -149,13 +157,12 @@ class Game:
                 else: print('-', end='')
             print()
 
-        
-
-
-# play game
-#   arg:    先手のagentの評価盤面, 後手の評価盤面
-#   return: 
-def play(first_eb, second_eb):
+            
+            
+# play game without display
+#   arg:    The first player's evaluation func., the second player's evaluation func.
+#   return: the winner
+def play(first_eb, second_eb, debug_mode):
     start = time.time()
     game = Game(START_BOARD.copy(), first_eb, second_eb)
     # -1が先手
@@ -164,12 +171,16 @@ def play(first_eb, second_eb):
         board = game.board.copy()
         _ = game.player_action(player)
         player *= -1
-    game.plot_board()
     end = time.time()
-    print("time: {:3.1f} seconds".format(end-start))
+    if debug_mode:
+        game.plot_board()
+        print("time: {:3.1f} seconds".format(end-start))
     return game.judge_winner()
      
 
+# Play game with display
+#   arg:    The first player's evaluation func., the second player's evaluation func.
+#   return: 
 def play_usermode(first_eb, second_eb):
     print("----------------------")
     print("----- Game Start -----")
