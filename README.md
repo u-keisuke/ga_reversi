@@ -1,10 +1,10 @@
 # GA-Reversi
 This is a program to simulate the optimization of evaluation function on Reversi game with GA algorithm.
 
-# Requirement
+## Requirement
 * numpy
 
-# Usage
+## Usage
 
 ### Simulates GA on reversi
 ```python
@@ -23,6 +23,6 @@ ga = GA(parameter)
 ga.evolve()
 ```
 
-# Author
+## Author
 * Keisuke Ueda
 * University of Tokyo
