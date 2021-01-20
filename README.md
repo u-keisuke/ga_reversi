@@ -6,7 +6,7 @@ This is a program to simulate the optimization of evaluation function on Reversi
 
 # Installation
 ```bash
-pip install numpy pandas
+pip install numpy
 ```
 
 # Usage
