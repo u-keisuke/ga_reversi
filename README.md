@@ -24,5 +24,4 @@ ga.evolve()
 ```
 
 ## Author
-* Keisuke Ueda
-* University of Tokyo
+* Keisuke Ueda (The University of Tokyo)
