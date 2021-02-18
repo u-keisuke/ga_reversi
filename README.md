@@ -1,5 +1,5 @@
 # GA-Reversi
-This is a program to simulate the optimization of evaluation function on Reversi game with GA algorithm.
+This is a program to simulate the optimization of evaluation function on Reversi game (known as 'Othello' in Japan) with GA algorithm.
 (This program is coded for my class.)
 
 ## Requirement
